@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Color guess</title>
+</head>
+
+<body>
+    <div id="game">
+        <div id="color-display">#0000ff</div>
+        <div id="message"></div>
+        <div id="color-options">
+            <div style="display: flex; justify-content: center;">
+                <label>
+                    <input type="radio" name="guess" value="#0000ff">
+                    <div class="color" style="background-color: #0000ff;"></div>
+                </label>
+                <label>
+                    <input type="radio" name="guess" value="#ffff00">
+                    <div class="color" style="background-color: #ffff00;"></div>
+                </label>
+                <label>
+                    <input type="radio" name="guess" value="#00ff00">
+                    <div class="color" style="background-color: #00ff00;"></div>
+                </label>
+                <label>
+                    <input type="radio" name="guess" value="#ff00ff">
+                    <div class="color" style="background-color: #ff00ff;"></div>
+                </label>
+                <label>
+                    <input type="radio" name="guess" value="#00ffff">
+                    <div class="color" style="background-color: #00ffff;"></div>
+                </label>
+            </div>
+        </div>
+        <div id="difficulty">
+            Difficulty:
+            <label>
+                <input type="radio" name="difficulty" value="2" checked> 2
+            </label>
+            <label>
+                <input type="radio" name="difficulty" value="3"> 3
+            </label>
+            <label>
+                <input type="radio" name="difficulty" value="5"> 5
+            </label>
+        </div>
+        <button id="guess-button">Guess</button>
+        <button id="new-color-button">New Color</button>
+    </div>
+
+
+    <script>
+        // This function changes the background color of all elements with the class "color" to the specific color
+        function changeColors(color) {
+            let squares = document.querySelectorAll(".color");
+            for (let i = 0; i < squares.length; i++) {
+                squares[i].style.backgroundColor = color;
+            }
+        }
+
+        // This function generates a specified number of random colors
+        function generateRandomColors(num) {
+            let colors = [];
+            for (let i = 0; i < num; i++) {
+                colors.push(randomColor());
+            }
+            return colors;
+        }
+
+        // This function generates a random hexadecimal color
+        function randomColor() {
+            let hexChars = "0123456789ABCDEF";
+            let color = "#";
+            for (let i = 0; i < 6; i++) {
+                color += hexChars[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // This function picks a random color from an array of colors
+        function pickColor() {
+            let random = Math.floor(Math.random() * colors.length);
+            return colors[random];
+        }
+
+        // This function shuffles the elements of an array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                let temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }
+
+        // These variables store elements with specific IDs or names
+        let colorDisplay = document.getElementById("color-display");
+        let message = document.getElementById("message");
+        let guessButton = document.getElementById("guess-button");
+        let newColorButton = document.getElementById("new-color-button");
+
+        // This variable stores all elements with the name "guess"
+        let options = document.getElementsByName("guess");
+
+        // This variable stores an array of shuffled random colors
+        let optionColors = shuffle([randomColor(), randomColor(), randomColor(), randomColor(), randomColor()]);
+
+        // This loop sets the value and background color of each "guess" element to a correct color in the optionColors array
+        for (let i = 0; i < options.length; i++) {
+            options[i].value = optionColors[i];
+            options[i].nextElementSibling.style.backgroundColor = optionColors[i];
+        }
+        let difficulty = 5;
+
+        // This loop sets the value of the difficulty variable to the value of the checked radio button when the value changes
+        document.getElementsByName("difficulty").forEach(function (radio) {
+            if (radio.value == difficulty) {
+                radio.checked = true;
+            }
+            radio.addEventListener("change", function () {
+                difficulty = parseInt(this.value);
+                options = document.getElementsByName("guess");
+                optionColors = shuffle([randomColor(), randomColor(), randomColor(), randomColor(), randomColor()]);
+                targetColor = optionColors[Math.floor(Math.random() * difficulty)];
+                colorDisplay.textContent = targetColor;
+                message.textContent = "";
+
+                // This loop sets the value and background color of each "guess" element to a correct
+                // color in the optionColors array, and hides elements that are not being used
+                for (let i = 0; i < options.length; i++) {
+                    options[i].value = optionColors[i];
+                    options[i].nextElementSibling.style.backgroundColor = optionColors[i];
+                    options[i].parentElement.style.display = "none";
+                }
+                for (let i = 0; i < difficulty; i++) {
+                    options[i].parentElement.style.display = "inline-block";
+                }
+            });
+        });
+
+        let targetColor = optionColors[0];
+        colorDisplay.textContent = targetColor;
+
+        // This event listener checks the player's guess when the guess button is clicked
+        guessButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            let guess;
+            let index;
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].checked) {
+                    guess = options[i].value;
+                    index = i;
+                    break;
+                }
+            }
+            if (guess === targetColor) {
+                message.textContent = "Correct";
+                changeColors(targetColor);
+            } else {
+                message.textContent = "Try Again";
+                options[index].parentElement.style.display = "none";
+            }
+        });
+        
+        // This event listener generates new options and a new target color when the new color button is clicked
+        newColorButton.addEventListener("click", function () {
+            options = document.getElementsByName("guess");
+            optionColors = shuffle([randomColor(), randomColor(), randomColor(), randomColor(), randomColor()]);
+            targetColor = optionColors[Math.floor(Math.random() * difficulty)];
+            colorDisplay.textContent = targetColor;
+            message.textContent = "";
+            for (let i = 0; i < options.length; i++) {
+                options[i].value = optionColors[i];
+                options[i].nextElementSibling.style.backgroundColor = optionColors[i];
+                options[i].parentElement.style.display = "none";
+            }
+            for (let i = 0; i < difficulty; i++) {
+                options[i].parentElement.style.display = "inline-block";
+            }
+        });
+
+    </script>
+</body>
+
+</html>
